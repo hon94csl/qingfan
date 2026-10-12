@@ -1,0 +1,31 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local credentials and settings
+.env
+.env.*
+!.env.example
+config.local.*
+*.pem
+*.key
+
+# Generated application artifacts
+/build/bin/
+/frontend/node_modules/
+/frontend/dist/
+/bin/
+/coverage/
+*.log
+
+# Runtime data and private media belong outside version control
+/data/
+/cache/
+/outputs/
+/tmp/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
