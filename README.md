@@ -49,7 +49,7 @@ make admin-dev   # http://127.0.0.1:5188，Vite 代理健康检查
 - `tests/integration/`：真实 FFmpeg/ffprobe 检查；缺失工具时明确跳过。
 - `tests/fixtures/`：测试素材约定。
 
-时间线、持久化、任务、AI 和回流包随各里程碑创建。`AGENTS.md` 保留初始贡献指南，实际工程状态和运行命令以本 README 为准。
+时间线、持久化、任务、AI 和回流包随各里程碑创建。贡献与技术规范见 [AGENTS.md](AGENTS.md)，工程状态和运行说明见本 README。
 
 真实商品素材、密钥、本地数据库和导出文件放在 Git 忽略的运行目录中；测试仅提交自制或明确允许分发的最小样本。依赖锁文件随应用代码提交。
 
