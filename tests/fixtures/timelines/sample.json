@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "output_id": "sample-m1",
+  "revision": 1,
+  "sku_id": "sku_demo",
+  "market": "ID",
+  "locale": "id-ID",
+  "canvas": {"width": 1080, "height": 1920, "fps": 30},
+  "font_asset_id": "font_lato",
+  "recipe": {
+    "hook_type": "demo",
+    "prompt_version": "fixed-m1"
+  },
+  "segments": [
+    {
+      "id": "seg_1",
+      "role": "hook",
+      "duration_ms": 4000,
+      "voice": {
+        "text": "Susah membuka tutup botol? Coba \"cara\" ini: 100% & ok",
+        "audio_id": "voice_demo",
+        "duration_ms": 3500
+      },
+      "shots": [
+        {"clip_id": "clip_red", "source_in_ms": 0, "source_out_ms": 2000},
+        {"clip_id": "clip_blue", "source_in_ms": 500, "source_out_ms": 2500}
+      ],
+      "original_audio": "mute",
+      "captions": [
+        {"start_ms": 0, "end_ms": 2000, "text": "Susah membuka tutup botol?"},
+        {"start_ms": 2000, "end_ms": 3500, "text": "Coba \"cara\" ini: 100% & ok"}
+      ],
+      "caption_style": "id-default"
+    }
+  ],
+  "bgm": {"asset_id": "bgm_demo", "gain_db": -18}
+}

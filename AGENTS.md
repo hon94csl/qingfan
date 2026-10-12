@@ -2,7 +2,7 @@
 
 ## 项目范围与技术栈
 
-青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进，当前只有工程骨架，渲染、AI、认证尚未实现。
+青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进。M1 已能用固定时间线和预录音频渲染竖屏样片；真实 SKU 运营验收、AI、认证和工作台业务尚未完成。
 
 - Go ≥ 1.25、Wails 2.16.0；Node 24、npm 11。
 - React 19.3、TypeScript 7.0.2（strict）、Vite 8.3；后台使用 Ant Design 6.6.4。
@@ -14,7 +14,7 @@
 - `main.go`、`app.go`：Wails 入口与薄绑定层；媒体业务放入 `internal/`，供桌面与 CLI 共用。
 - `frontend/`：桌面工作台；`frontend/wailsjs/` 为生成绑定，不手改接口。
 - `admin/`：独立管理后台；优先复用现有 Ant Design 组件，来源见 [复用说明](docs/admin-reuse.md)。
-- `cmd/qingfan-render/`：当前仅有 `doctor`；`cmd/qingfan-server/`：当前仅有 `/healthz`。
+- `cmd/qingfan-render/`：`doctor` 与固定时间线 `render`；`cmd/qingfan-server/`：当前仅有 `/healthz`。
 - `tests/fixtures/`：可分发样本；`tests/integration/`：真实媒体测试；`docs/validation/`：验收证据。
 
 ## 开发命令

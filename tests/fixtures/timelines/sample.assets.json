@@ -1,0 +1,42 @@
+{
+  "assets": [
+    {
+      "id": "clip_red",
+      "kind": "clip",
+      "path": "../media/clip_red.mp4",
+      "sha256": "de3f6f9c381d93cdfc9a3f6e474a88384ac766b9a0cecda425fe99814b2780ca",
+      "sku_id": "sku_demo",
+      "source": "owned"
+    },
+    {
+      "id": "clip_blue",
+      "kind": "clip",
+      "path": "../media/clip_blue.mp4",
+      "sha256": "b2ecbb46b285b6eb697ec4965c8395fcdb7ecabc15df28855b96fd93b86f48af",
+      "sku_id": "sku_demo",
+      "source": "owned"
+    },
+    {
+      "id": "voice_demo",
+      "kind": "voice",
+      "path": "../media/voice_demo.wav",
+      "sha256": "fa12c16daba6af6106086c3207f83e2225cebc84e5800582c6592cb642d372df",
+      "sku_id": "sku_demo",
+      "source": "owned"
+    },
+    {
+      "id": "bgm_demo",
+      "kind": "bgm",
+      "path": "../media/bgm_demo.wav",
+      "sha256": "ca6bcca0d12e9424231f5779de4a002b6210304c5c1494a85bbc278ffecaf5f8",
+      "source": "library"
+    },
+    {
+      "id": "font_lato",
+      "kind": "font",
+      "path": "../fonts/Lato-Regular.ttf",
+      "sha256": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
+      "source": "library"
+    }
+  ]
+}
