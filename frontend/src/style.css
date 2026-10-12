@@ -1,0 +1,10 @@
+body { margin: 0; background: #f4f8fb; color: #0f172a; font-family: system-ui, sans-serif; }
+main { max-width: 900px; margin: 0 auto; padding: 64px 24px; }
+.eyebrow { color: #0e7490; letter-spacing: .12em; }
+h1 { font-size: clamp(28px, 4vw, 42px); }
+p { line-height: 1.7; }
+section { background: white; padding: 28px; border: 1px solid #e2e8f0; border-radius: 16px; margin: 32px 0; }
+button { background: #0e7490; color: white; border: 0; border-radius: 8px; padding: 12px 20px; font: inherit; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+article { border-top: 1px solid #e2e8f0; margin-top: 24px; overflow-wrap: anywhere; }
+[role=alert] { color: #b91c1c; }

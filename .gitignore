@@ -13,7 +13,10 @@ config.local.*
 # Generated application artifacts
 /build/bin/
 /frontend/node_modules/
-/frontend/dist/
+/frontend/dist/*
+!/frontend/dist/gitkeep
+/admin/node_modules/
+/admin/dist/
 /bin/
 /coverage/
 *.log
@@ -29,3 +32,6 @@ config.local.*
 *.db
 *.db-shm
 *.db-wal
+
+# Wails dependency cache
+/frontend/package.json.md5
