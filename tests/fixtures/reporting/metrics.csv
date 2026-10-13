@@ -1,0 +1,9 @@
+source,shop,account,video_id,date,views,orders,gmv_minor,currency,timezone
+shop_export,shop-a,act-1,7123456789012345678,2026-10-12,100,2,50000,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,7123456789012345678,2026-10-13,,0,,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,7123456789012345678,2026-10-14,0,0,0,IDR,Asia/Jakarta
+ads_export,shop-b,act-2,7999888777666555444,2026-10-12,8,1,1000,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,,2026-10-12,3,1,10,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,7123456789012345678,2026-10-12,9,9,9,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,7000000000000000001,13-10-2026,1,1,1,IDR,Asia/Jakarta
+shop_export,shop-a,act-1,7000000000000000002,2026-10-12,no,1,1,IDR,Asia/Jakarta

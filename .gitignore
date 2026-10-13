@@ -12,6 +12,7 @@ config.local.*
 
 # Generated application artifacts
 /build/bin/
+/build/trial/
 /frontend/node_modules/
 /frontend/dist/*
 !/frontend/dist/gitkeep

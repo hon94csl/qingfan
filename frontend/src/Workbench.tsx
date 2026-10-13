@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { backend, messageOf, type Asset, type Candidate, type Clip, type Draft, type ShotNote } from './api';
+import { backend, messageOf, type Asset, type Candidate, type Clip, type Draft, type MetricPreview, type Publication, type ShotNote } from './api';
 import { ScriptReview } from './components/ScriptReview';
 import { SegmentCard } from './components/SegmentCard';
 import { mergeDraftSegments, segmentFromDraft, toDraftSegment, type Segment } from './components/segment';
@@ -11,6 +11,24 @@ const emptySegment = (): Segment => ({
   shots: [{ clipId: '', sourceInMS: 0, sourceOutMS: 0 }],
   captions: [{ text: '', startMS: 0, endMS: 0 }],
 });
+
+function describePreview(preview: MetricPreview): string {
+  const sources = (preview.sources ?? []).join('、') || '未识别';
+  const shops = (preview.shops ?? []).join('、') || '未识别';
+  const zones = (preview.timezones ?? []).join('、') || '未识别';
+  const currencies = (preview.currencies ?? []).join('、') || '未识别';
+  const problems = (preview.errors ?? []).map((item) => item.message).join('；');
+  const unbound = (preview.unbound ?? []).join('、');
+  return [
+    `来源 ${sources}`,
+    `店铺 ${shops}`,
+    `时区 ${zones}`,
+    `币种 ${currencies}`,
+    preview.repeated ? '这批报表已经导入过' : `可导入 ${preview.accepted} 行`,
+    problems ? `错误：${problems}` : '',
+    unbound ? `未绑定：${unbound}` : '',
+  ].filter(Boolean).join('。');
+}
 
 export function Workbench() {
   const api = backend();
@@ -36,7 +54,15 @@ export function Workbench() {
   const [exportPath, setExportPath] = useState('outputs/export.mp4');
   const [outputs, setOutputs] = useState<{ id: string; path: string; draft_revision: number }[]>([]);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState(api ? '' : '当前是浏览器预览。保存、预览、导出和生成候选需要在桌面应用里打开。');
+  const [outputID, setOutputID] = useState('');
+  const [publishURL, setPublishURL] = useState('');
+  const [videoID, setVideoID] = useState('');
+  const [shop, setShop] = useState('');
+  const [publishedAt, setPublishedAt] = useState('');
+  const [csvText, setCsvText] = useState('');
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [feedback, setFeedback] = useState('');
+  const [notice, setNotice] = useState(api ? '' : '当前是浏览器预览。保存、预览、导出、生成候选、发布绑定和回流预览需要在桌面应用里打开。');
 
   async function run(action: () => Promise<void>) {
     setError('');
@@ -204,10 +230,38 @@ export function Workbench() {
           if (!api || !draft) throw new Error('先保存草稿');
           const output = await api.ExportDraft(draft.id, exportPath);
           setOutputs(await api.ListOutputs(draft.id));
+          setOutputID(output.id);
           setNotice(`成片已写入 ${output.path}`);
         })}>导出</button>
       </div>
       {outputs.length > 0 && <ul>{outputs.map((output) => <li key={output.id}>修订 {output.draft_revision}：{output.path}</li>)}</ul>}
+      <fieldset className="card">
+        <legend>发布与回流</legend>
+        <label>成片编号<input value={outputID} onChange={(event) => setOutputID(event.target.value)} /></label>
+        <label>发布链接<input value={publishURL} onChange={(event) => setPublishURL(event.target.value)} /></label>
+        <label>视频编号<input value={videoID} onChange={(event) => setVideoID(event.target.value)} /></label>
+        <label>店铺<input value={shop} onChange={(event) => setShop(event.target.value)} /></label>
+        <label>发布时间<input value={publishedAt} onChange={(event) => setPublishedAt(event.target.value)} /></label>
+        <button type="button" onClick={() => run(async () => {
+          if (!api) throw new Error('绑定发布需要在桌面应用里打开');
+          const saved = await api.BindPublication(outputID, publishURL, videoID, shop, publishedAt);
+          setPublications((current) => [...current, saved]);
+          setNotice(`已绑定视频 ${saved.video_id}`);
+        })}>绑定发布</button>
+        {publications.length > 0 && <ul>{publications.map((item) => <li key={item.id}>{item.video_id} · {item.shop} · {item.published_at}</li>)}</ul>}
+        <label>回流 CSV<textarea value={csvText} onChange={(event) => setCsvText(event.target.value)} /></label>
+        <button type="button" onClick={() => run(async () => {
+          if (!api) throw new Error('预览回流需要在桌面应用里打开');
+          setFeedback(describePreview(await api.PreviewMetrics(csvText)));
+        })}>预览回流</button>
+        <button type="button" onClick={() => run(async () => {
+          if (!api) throw new Error('导入回流需要在桌面应用里打开');
+          const imported = await api.ImportMetrics(csvText);
+          setFeedback(describePreview(imported));
+          setNotice(imported.repeated ? '这批报表已经导入过' : `已导入 ${imported.accepted} 行`);
+        })}>导入回流</button>
+        {feedback && <p>{feedback}</p>}
+      </fieldset>
     </section>
   );
 }

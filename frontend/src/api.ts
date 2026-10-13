@@ -61,6 +61,24 @@ export type Candidate = {
   segments: ScriptSegment[];
 };
 export type Generation = { notes: ShotNote[] | null; candidates: Candidate[] | null };
+export type Publication = {
+  id: string;
+  output_id: string;
+  url: string;
+  video_id: string;
+  shop: string;
+  published_at: string;
+};
+export type MetricPreview = {
+  sources: string[] | null;
+  shops: string[] | null;
+  timezones: string[] | null;
+  currencies: string[] | null;
+  accepted: number;
+  repeated: boolean;
+  errors: { line: number; message: string }[] | null;
+  unbound: string[] | null;
+};
 
 type Backend = {
   CreateProject(name: string, market: string, locale: string): Promise<Project>;
@@ -77,6 +95,9 @@ type Backend = {
   SaveCorrection(skuID: string, note: ShotNote): Promise<ShotNote>;
   Retranslate(skuID: string, candidate: Candidate): Promise<Candidate>;
   AssembleCandidate(projectID: string, skuID: string, fontID: string, bgmID: string, voice: string, candidate: Candidate): Promise<Draft>;
+  BindPublication(outputID: string, url: string, videoID: string, shop: string, publishedAt: string): Promise<Publication>;
+  PreviewMetrics(csv: string): Promise<MetricPreview>;
+  ImportMetrics(csv: string): Promise<MetricPreview>;
 };
 
 export function backend(): Backend | null {

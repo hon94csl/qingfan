@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/hon94csl/qingfan/internal/timeline"
@@ -144,7 +143,7 @@ func Render(ctx context.Context, tl timeline.Timeline, assets []timeline.Asset, 
 		Resources:     resources(tl, resolved),
 		Renderer:      BuildInfo{Name: RendererName, Version: RendererVersion},
 		FFmpeg:        ff,
-		Encoder:       EncoderInfo{Name: EncoderName, Config: EncoderConfig},
+		Encoder:       encoderInfo(Resolved()),
 		DurationMS:    total,
 		Quality:       report,
 		Notes:         notes,
@@ -383,16 +382,7 @@ func mux(ctx context.Context, work, partial string, total int) error {
 }
 
 func appendVideoEncode(args []string, fps int) []string {
-	return append(args,
-		"-c:v", EncoderName,
-		"-preset", "veryfast",
-		"-crf", "23",
-		"-pix_fmt", "yuv420p",
-		"-fps_mode", "cfr",
-		"-r", strconv.Itoa(fps),
-		"-threads", "1",
-		"-x264-params", "threads=1:sliced-threads=0",
-	)
+	return append(args, Resolved().Args(fps)...)
 }
 
 func resources(tl timeline.Timeline, assets []timeline.Asset) []Resource {

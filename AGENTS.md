@@ -2,7 +2,7 @@
 
 ## 项目范围与技术栈
 
-青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进。M1 已能用固定时间线和预录音频渲染竖屏样片。M2 已有本地 SQLite 素材库和手动工作台。M3 已有调用网关、固定响应脚本和按配音时长配镜。真实 SKU 运营验收、真实供应商和印尼语母语审核尚未完成。
+青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进。M1 已能用固定时间线和预录音频渲染竖屏样片。M2 已有本地 SQLite 素材库和手动工作台。M3 已有调用网关、固定响应脚本和按配音时长配镜。M4 已有步骤恢复、编码回退、发布绑定、CSV 模板和本机试用目录。真实 SKU 运营验收、真实供应商和印尼语母语审核尚未完成。
 
 - Go ≥ 1.25、Wails 2.16.0；Node 24、npm 11。
 - React 19.3、TypeScript 7.0.2（strict）、Vite 8.3；后台使用 Ant Design 6.6.4。
@@ -28,6 +28,7 @@ make server       # 本机服务 :8090
 make admin-dev    # 后台 :5188，另开终端运行
 make admin-build  # 后台产物 admin/dist/
 make test         # Go 测试、后台测试、桌面组件测试、两端类型检查和构建
+make trial        # 本机试用目录 build/trial/，不提交二进制
 ```
 
 ## 编码与安全规范

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/hon94csl/qingfan/internal/ai"
+	"github.com/hon94csl/qingfan/internal/jobs"
 	"github.com/hon94csl/qingfan/internal/store"
 	"github.com/hon94csl/qingfan/internal/timeline"
 )
@@ -166,19 +168,13 @@ func (a *App) AssembleCandidate(projectID, skuID, fontID, bgmID, voice string, c
 	}
 	plans := make([]timeline.SegmentPlan, 0, len(candidate.Segments))
 	for _, seg := range candidate.Segments {
-		take, err := ai.Synthesize(a.ctx, a.ai, plain, skuID, voice, seg)
-		if err != nil {
+		path := voiceCachePath(voice, seg.VoiceText)
+		stepKey := jobs.Key("tts", ai.PromptVersion, voice, seg.VoiceText)
+		if _, err := loadVoice(a.ctx, a.ai, plain, skuID, voice, seg, path); err != nil {
+			_ = a.db.PutStep(skuID, stepKey, jobs.Failed, "", "配音失败")
 			return store.Draft{}, err
 		}
-		if !take.Matches(seg.VoiceText, voice) {
-			return store.Draft{}, ai.ErrInvalidAudio
-		}
-		dir := filepath.Join(dataDir(), "cache", "tts")
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return store.Draft{}, err
-		}
-		path := filepath.Join(dir, take.TextHash+"-"+voice+".wav")
-		if err := os.WriteFile(path, take.WAV, 0o644); err != nil {
+		if err := a.db.PutStep(skuID, stepKey, jobs.Succeeded, path, ""); err != nil {
 			return store.Draft{}, err
 		}
 		imported, err := a.db.Import(a.ctx, store.ImportRequest{
@@ -242,4 +238,36 @@ func (a *App) voiceDuration(skuID, assetID string) (int, error) {
 		}
 	}
 	return 0, ai.ErrInvalidAudio
+}
+
+func voiceCachePath(voice, text string) string {
+	return filepath.Join(dataDir(), "cache", "steps", jobs.Key("tts", ai.PromptVersion, voice, text)+".wav")
+}
+
+func readCachedVoice(path string) ([]byte, bool) {
+	body, err := os.ReadFile(path)
+	if err != nil || len(body) == 0 {
+		return nil, false
+	}
+	return body, true
+}
+
+// loadVoice reuses a validated wav. A cache hit does not call the provider.
+func loadVoice(ctx context.Context, g *ai.Gateway, token, task, voice string, seg ai.ScriptSegment, path string) ([]byte, error) {
+	if wav, ok := readCachedVoice(path); ok {
+		return wav, nil
+	}
+	take, err := ai.Synthesize(ctx, g, token, task, voice, seg)
+	if err != nil {
+		return nil, err
+	}
+	if !take.Matches(seg.VoiceText, voice) {
+		return nil, ai.ErrInvalidAudio
+	}
+	if err := jobs.Publish(path, func(partial string) error {
+		return os.WriteFile(partial, take.WAV, 0o644)
+	}); err != nil {
+		return nil, err
+	}
+	return take.WAV, nil
 }
