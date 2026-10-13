@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { CheckMediaTools } from '../wailsjs/go/main/App';
+import { Workbench } from './Workbench';
 import './style.css';
 
 type ToolStatus = { name: string; path: string; version: string; error?: string };
@@ -18,7 +19,7 @@ function App() {
   return <main>
     <p className="eyebrow">QINGFAN / 青帆</p>
     <h1>从商品素材，到可发布的视频</h1>
-    <p>工程已就绪。下一步：用固定时间线验证配音、配镜、字幕与本地导出。</p>
+    <p>用素材库和分段卡片手工完成一条竖屏成片。模型生成留到后续里程碑。</p>
     <section aria-labelledby="environment">
       <h2 id="environment">本地媒体环境</h2>
       <p>首次开发先确认 FFmpeg 和 ffprobe 可用。</p>
@@ -29,7 +30,7 @@ function App() {
         <p>{tool.error || tool.version}</p><code>{tool.path}</code>
       </article>)}</div>
     </section>
-    <p>素材导入、脚本编辑与视频导出将在后续里程碑接入。</p>
+    <Workbench />
   </main>;
 }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);

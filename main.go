@@ -16,7 +16,7 @@ func main() {
 	if err := wails.Run(&options.App{
 		Title: "青帆 · 素材生产", Width: 1200, Height: 800,
 		AssetServer: &assetserver.Options{Assets: assets},
-		OnStartup:   app.startup, Bind: []interface{}{app},
+		OnStartup:   app.startup, OnShutdown: app.shutdown, Bind: []interface{}{app},
 	}); err != nil {
 		log.Fatal(err)
 	}

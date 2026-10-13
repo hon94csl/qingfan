@@ -2,11 +2,11 @@
 
 ## 项目范围与技术栈
 
-青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进。M1 已能用固定时间线和预录音频渲染竖屏样片；真实 SKU 运营验收、AI、认证和工作台业务尚未完成。
+青帆优先实现商品视频混剪；发布和效果回流可人工配合，不依赖 TikTok API。按 [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md) 推进。M1 已能用固定时间线和预录音频渲染竖屏样片。M2 已有本地 SQLite 素材库和手动工作台。真实 SKU 运营验收、AI 和认证尚未完成。
 
 - Go ≥ 1.25、Wails 2.16.0；Node 24、npm 11。
 - React 19.3、TypeScript 7.0.2（strict）、Vite 8.3；后台使用 Ant Design 6.6.4。
-- 媒体处理用 FFmpeg/ffprobe；本地持久化计划使用 SQLite，尚未接入。
+- 媒体处理用 FFmpeg/ffprobe；本地业务数据使用 SQLite（`modernc.org/sqlite`，无 cgo）。
 - 依赖版本以 `go.mod`、两端 `package.json` 和锁文件为准；变更依赖须同步锁文件。
 
 ## 目录与架构边界
@@ -27,7 +27,7 @@ make build        # 打包到 build/bin/
 make server       # 本机服务 :8090
 make admin-dev    # 后台 :5188，另开终端运行
 make admin-build  # 后台产物 admin/dist/
-make test         # Go 测试、后台测试、两端类型检查和构建
+make test         # Go 测试、后台测试、桌面组件测试、两端类型检查和构建
 ```
 
 ## 编码与安全规范
@@ -40,7 +40,7 @@ make test         # Go 测试、后台测试、两端类型检查和构建
 
 ## 测试与提交
 
-Go 使用 `testing`，文件命名 `*_test.go`；后台请求测试使用 Node 内置测试器（`npm --prefix admin test`），桌面组件测试器尚未配置。新逻辑覆盖成功及关键失败路径；媒体验收必须检查真实输出并播放，不能用 mock 代替。无固定覆盖率门槛。
+Go 使用 `testing`，文件命名 `*_test.go`；后台请求测试使用 Node 内置测试器（`npm --prefix admin test`）。桌面分段卡片使用 Vitest（`npm --prefix frontend test`）。新逻辑覆盖成功及关键失败路径；媒体验收必须检查真实输出并播放，不能用 mock 代替。无固定覆盖率门槛。
 
 提交前运行相关测试和 `git diff --check`。缺失媒体工具可明确跳过，已安装但损坏必须报错，不能改测试掩盖环境故障。
 

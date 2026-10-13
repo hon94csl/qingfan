@@ -15,6 +15,7 @@ build:
 test:
 	go test ./...
 	npm --prefix admin test
+	npm --prefix frontend test
 	npm --prefix frontend run build
 	npm --prefix admin run build
 
