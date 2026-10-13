@@ -37,7 +37,7 @@
 
 ## 总体架构与数据归属
 
-管理后台独立放在 `admin/`，复用 tk-flywheel 的 React + Ant Design 布局、主题和请求错误处理。当前仅接健康检查；认证、模型配置和调用记录随 M3 实施，复用边界见 [说明](admin-reuse.md)。
+管理后台独立放在 `admin/`，复用 tk-flywheel 的 React + Ant Design 布局、主题和请求错误处理。当前只检查健康状态。用量库在服务端，密钥不进页面，复用边界见 [说明](admin-reuse.md)。
 
 客户端采用 **Wails v2 + Go + React/TypeScript**。媒体模块独立于界面，命令行验证工具与桌面端调用同一套 Go 代码。首版后端为小型 Go 服务，负责受控模型调用与用量记录；后续按模块扩展，不提前拆微服务。
 

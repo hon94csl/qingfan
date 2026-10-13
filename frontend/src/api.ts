@@ -30,8 +30,37 @@ export type Draft = {
   font_asset_id: string;
   bgm_asset_id: string;
   bgm_gain_db: number;
+  hook_type?: string;
+  prompt_version?: string;
   segments: DraftSegment[];
 };
+export type ShotNote = {
+  clip_id: string;
+  subject: string;
+  action: string;
+  purpose: string;
+  selling_points: string[] | null;
+  source_in_ms: number;
+  source_out_ms: number;
+  manual: boolean;
+};
+export type ScriptSegment = {
+  id: string;
+  role: string;
+  purpose: string;
+  fact_ids: string[];
+  voice_text: string;
+  clip_ids: string[];
+  estimated_ms: number;
+};
+export type Candidate = {
+  id: string;
+  hook_type: string;
+  back_translation: string;
+  translation_of: string;
+  segments: ScriptSegment[];
+};
+export type Generation = { notes: ShotNote[] | null; candidates: Candidate[] | null };
 
 type Backend = {
   CreateProject(name: string, market: string, locale: string): Promise<Project>;
@@ -43,6 +72,11 @@ type Backend = {
   PreviewDraft(draftID: string, outputPath: string): Promise<{ output_id: string }>;
   ExportDraft(draftID: string, outputPath: string): Promise<{ id: string; path: string }>;
   ListOutputs(draftID: string): Promise<{ id: string; path: string; draft_revision: number }[]>;
+  GenerateScripts(skuID: string, facts: string): Promise<Generation>;
+  ListNotes(skuID: string): Promise<ShotNote[]>;
+  SaveCorrection(skuID: string, note: ShotNote): Promise<ShotNote>;
+  Retranslate(skuID: string, candidate: Candidate): Promise<Candidate>;
+  AssembleCandidate(projectID: string, skuID: string, fontID: string, bgmID: string, voice: string, candidate: Candidate): Promise<Draft>;
 };
 
 export function backend(): Backend | null {

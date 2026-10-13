@@ -50,16 +50,18 @@ type DraftSegment struct {
 
 // Draft is editable. Exported manifests are not.
 type Draft struct {
-	ID          string         `json:"id"`
-	ProjectID   string         `json:"project_id"`
-	SKUID       string         `json:"sku_id"`
-	Revision    int            `json:"revision"`
-	Market      string         `json:"market"`
-	Locale      string         `json:"locale"`
-	FontAssetID string         `json:"font_asset_id"`
-	BGMAssetID  string         `json:"bgm_asset_id"`
-	BGMGainDB   float64        `json:"bgm_gain_db"`
-	Segments    []DraftSegment `json:"segments"`
+	ID            string         `json:"id"`
+	ProjectID     string         `json:"project_id"`
+	SKUID         string         `json:"sku_id"`
+	Revision      int            `json:"revision"`
+	Market        string         `json:"market"`
+	Locale        string         `json:"locale"`
+	FontAssetID   string         `json:"font_asset_id"`
+	BGMAssetID    string         `json:"bgm_asset_id"`
+	BGMGainDB     float64        `json:"bgm_gain_db"`
+	HookType      string         `json:"hook_type,omitempty"`
+	PromptVersion string         `json:"prompt_version,omitempty"`
+	Segments      []DraftSegment `json:"segments"`
 }
 
 // Output is one immutable export.
@@ -112,8 +114,10 @@ func (s *Store) SaveDraft(draft Draft) (Draft, error) {
 		return Draft{}, err
 	}
 	body, err := json.Marshal(struct {
-		Segments []DraftSegment `json:"segments"`
-	}{Segments: draft.Segments})
+		Segments      []DraftSegment `json:"segments"`
+		HookType      string         `json:"hook_type,omitempty"`
+		PromptVersion string         `json:"prompt_version,omitempty"`
+	}{Segments: draft.Segments, HookType: draft.HookType, PromptVersion: draft.PromptVersion})
 	if err != nil {
 		return Draft{}, err
 	}
@@ -177,12 +181,16 @@ func (s *Store) GetDraft(id string) (Draft, error) {
 		return Draft{}, err
 	}
 	var wrapped struct {
-		Segments []DraftSegment `json:"segments"`
+		Segments      []DraftSegment `json:"segments"`
+		HookType      string         `json:"hook_type"`
+		PromptVersion string         `json:"prompt_version"`
 	}
 	if err := json.Unmarshal([]byte(body), &wrapped); err != nil {
 		return Draft{}, err
 	}
 	draft.Segments = wrapped.Segments
+	draft.HookType = wrapped.HookType
+	draft.PromptVersion = wrapped.PromptVersion
 	return draft, nil
 }
 
@@ -343,7 +351,7 @@ func (s *Store) build(draftID string) (timeline.Timeline, []timeline.Asset, Draf
 		Locale:        draft.Locale,
 		Canvas:        timeline.Canvas{Width: 1080, Height: 1920, FPS: 30},
 		FontAssetID:   font.ID,
-		Recipe:        timeline.Recipe{HookType: "manual", PromptVersion: "workbench-m2"},
+		Recipe:        timeline.Recipe{HookType: recipeHook(draft.HookType), PromptVersion: recipeVersion(draft.PromptVersion)},
 		BGM:           timeline.BGM{AssetID: bgm.ID, GainDB: draft.BGMGainDB},
 	}
 	for _, seg := range draft.Segments {

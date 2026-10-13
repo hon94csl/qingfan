@@ -37,7 +37,7 @@ function Admin() {
             ]} />}
         </Card>
         <Card title="后续接入"><Typography.Paragraph>
-          模型配置、工作空间授权与调用记录将在 AI 网关阶段接入。视频混剪在桌面端完成。
+          用量记录在服务端数据库。这个页面只检查服务是否在运行，不保存供应商密钥。视频混剪在桌面端完成。
         </Typography.Paragraph></Card>
       </Layout.Content>
     </Layout>

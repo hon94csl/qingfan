@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-工程骨架已初始化：Wails 桌面端、媒体环境检查 CLI、Go 健康检查服务，以及复用 tk-flywheel 的独立管理后台。M1 可以用固定时间线和预录音频在本地渲染 1080×1920、30fps 的竖屏样片。M2 已接入 SQLite 素材库和手动工作台，用固定素材与预录配音完成导入、分段编辑、预览和导出，不调用模型。AI 与认证尚未实现。首版不依赖 TikTok API；发布与回流通过人工发布、链接绑定和 CSV 导入完成。真实 SKU 的运营验收仍未进行。
+工程骨架已初始化：Wails 桌面端、媒体环境检查 CLI、Go 服务，以及复用 tk-flywheel 的独立管理后台。M1 可以用固定时间线和预录音频在本地渲染 1080×1920、30fps 的竖屏样片。M2 已接入 SQLite 素材库和手动工作台。M3 已接入调用网关、固定响应的脚本候选、分段配音和按实际时长配镜；没有供应商凭据时不会把固定响应当成真实模型结果。首版不依赖 TikTok API。真实 SKU 的运营验收和印尼语母语审核仍未进行。
 
 - [架构设计](<docs/TK 电商素材生产与效果回流系统 · 架构设计.md>)：范围、媒体流水线、时间线协议和后续方向。
 - [开发计划](docs/plans/2026-10-13-qingfan-mvp-development-plan.md)：M0–M4 的实现顺序、文件边界和验收条件。
@@ -15,7 +15,7 @@
 
 ## 开发起点
 
-M0、M1 的技术渲染和 M2 的手动工作台已经接上。下一步是 M3 的素材理解、脚本和配音。真实 SKU 的运营验收仍待进行。
+M0、M1 的技术渲染、M2 的手动工作台和 M3 的固定响应生成已经接上。真实供应商、母语审核和真实 SKU 运营验收仍待进行。下一步是 M4 的恢复与试用交付，本次没有实现。
 
 ## 本地开发
 
@@ -38,7 +38,7 @@ make server      # http://127.0.0.1:8090/healthz
 make admin-dev   # http://127.0.0.1:5188，Vite 代理健康检查
 ```
 
-`make admin-build` 生成 `admin/dist/`。当前服务不托管该目录；生产部署及认证留到 M3。桌面浏览器预览没有 Wails 绑定，实际环境检查需在 `make dev` 启动的桌面窗口操作。
+`make admin-build` 生成 `admin/dist/`。当前服务不托管该目录。对外监听使用 `qingfan-server -public -tls-cert CERT -tls-key KEY`；缺少证书时拒绝启动。桌面浏览器预览没有 Wails 绑定，实际环境检查和生成候选需在 `make dev` 启动的桌面窗口操作。
 
 ## 代码结构
 
@@ -46,10 +46,12 @@ make admin-dev   # http://127.0.0.1:5188，Vite 代理健康检查
 - `frontend/`：桌面 React 工作台；`wailsjs/` 为生成的绑定。
 - `admin/`：独立 React + Ant Design 管理后台，见[复用说明](docs/admin-reuse.md)。
 - `cmd/qingfan-render/`：`doctor` 检查媒体工具；`render` 按固定时间线导出样片。
-- `cmd/qingfan-server/`：当前仅提供 `/healthz`。
-- `internal/timeline/`：时间线 v1 的类型、校验、时长和 30fps 边界。
+- `cmd/qingfan-server/`：`/healthz`，以及带工作空间令牌的 `/v1/tokens`、`/v1/tokens/revoke`、`/v1/usage`、`/v1/scripts`。
+- `internal/timeline/`：时间线 v1 的类型、校验、时长、按配音配镜和 30fps 边界。
 - `internal/media/`：探测、入库、裁切装配、字幕、混音、libx264 合成和基础质检。
 - `internal/store/`：SQLite 迁移、项目、商品、素材、镜头区间、草稿和成片记录。默认库文件是 `data/qingfan.sqlite`，可用 `QINGFAN_DATA` 指定目录。
+- `internal/ai/`：网关、用量库、镜头理解、脚本、回译和配音。供应商密钥只从服务端环境读取。
+- `internal/credentials/`：桌面工作空间令牌。macOS 使用系统凭据库，测试使用内存实现。
 - `internal/jobs/`：导入、预览和导出的任务记录。
 - `tests/integration/`：真实 FFmpeg/ffprobe 检查；工具不在 PATH 时跳过，找到但无法启动时失败。
 - `tests/fixtures/`：自制短视频、音频、字体和时间线。真实商品素材不在这里。
@@ -64,7 +66,7 @@ go test ./internal/timeline/ ./internal/media/ ./cmd/qingfan-render/ ./tests/int
 
 `make test` 还会跑后台请求测试、桌面分段卡片测试，以及两个前端的类型检查与构建。`make doctor` 检查当前 PATH 上的 FFmpeg/ffprobe。
 
-桌面工作台在 `make dev` 里使用。浏览器打开 Vite 页面时没有 Wails 绑定，只能检查表单和错误提示。导入、保存、预览和导出走桌面绑定，落到上面的 SQLite 和媒体核心。步骤与限制见 [工作台验证记录](docs/validation/workbench-baseline.md)。
+桌面工作台在 `make dev` 里使用。浏览器打开 Vite 页面时没有 Wails 绑定，只能检查表单和错误提示。导入、保存、预览、导出和生成候选走桌面绑定。没有 `QINGFAN_PROVIDER_URL` 时，桌面和服务使用固定响应，并仍经过素材编号、事实和时间校验。步骤与限制见 [工作台验证记录](docs/validation/workbench-baseline.md) 和 [生成试点记录](docs/validation/generation-pilot.md)。
 
 生成自制样片（两次使用同一时间线和资源，输出路径不同，便于比较内容）：
 

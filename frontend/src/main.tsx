@@ -19,7 +19,7 @@ function App() {
   return <main>
     <p className="eyebrow">QINGFAN / 青帆</p>
     <h1>从商品素材，到可发布的视频</h1>
-    <p>用素材库和分段卡片手工完成一条竖屏成片。模型生成留到后续里程碑。</p>
+    <p>用素材库整理商品镜头，审核口播候选，再导出竖屏成片。</p>
     <section aria-labelledby="environment">
       <h2 id="environment">本地媒体环境</h2>
       <p>首次开发先确认 FFmpeg 和 ffprobe 可用。</p>

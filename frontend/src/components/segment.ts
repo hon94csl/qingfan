@@ -47,6 +47,30 @@ export function applyVoice(segment: Segment, voiceAssetId: string, voices: Voice
   return { ...segment, voiceAssetId };
 }
 
+export function segmentFromDraft(segment: DraftSegment): Segment {
+  return {
+    id: segment.id,
+    voiceText: segment.voice_text,
+    voiceAssetId: segment.voice_asset_id,
+    shots: segment.shots.map((shot) => ({
+      clipId: shot.clip_id,
+      sourceInMS: shot.source_in_ms,
+      sourceOutMS: shot.source_out_ms,
+    })),
+    captions: segment.captions.map((caption) => ({
+      text: caption.text,
+      startMS: caption.start_ms,
+      endMS: caption.end_ms,
+    })),
+  };
+}
+
+export function mergeDraftSegments(segment: Segment, existing: DraftSegment[] | undefined): DraftSegment[] {
+  const first = toDraftSegment(segment);
+  if (existing?.[0]?.role) first.role = existing[0].role;
+  return [first, ...(existing ?? []).slice(1)];
+}
+
 export function toDraftSegment(segment: Segment): DraftSegment {
   return {
     id: segment.id,

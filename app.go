@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hon94csl/qingfan/internal/ai"
+	"github.com/hon94csl/qingfan/internal/credentials"
 	"github.com/hon94csl/qingfan/internal/media"
 	"github.com/hon94csl/qingfan/internal/store"
 )
@@ -15,20 +17,41 @@ type App struct {
 	ctx      context.Context
 	db       *store.Store
 	storeErr error
+	ai       *ai.Gateway
+	aiErr    error
+	creds    credentials.Store
+}
+
+func dataDir() string {
+	if base := os.Getenv("QINGFAN_DATA"); base != "" {
+		return base
+	}
+	return "data"
 }
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	base := os.Getenv("QINGFAN_DATA")
-	if base == "" {
-		base = "data"
+	if a.creds == nil {
+		a.creds = credentials.Default()
 	}
+	base := dataDir()
 	db, err := store.Open(filepath.Join(base, "qingfan.sqlite"), filepath.Join(base, "cache"))
 	a.db = db
 	a.storeErr = err
+	provider, err := ai.ProviderFromEnv()
+	if err != nil {
+		a.aiErr = err
+		return
+	}
+	gateway, err := ai.Open(filepath.Join(base, "usage.sqlite"), provider, 2)
+	a.ai = gateway
+	a.aiErr = err
 }
 
 func (a *App) shutdown(context.Context) {
+	if a.ai != nil {
+		a.ai.Close()
+	}
 	if a.db != nil {
 		a.db.Close()
 	}
