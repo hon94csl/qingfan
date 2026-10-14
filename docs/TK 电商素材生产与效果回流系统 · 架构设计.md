@@ -247,7 +247,7 @@ flowchart LR
 
 保留比率分子分母；缺失字段用不可用状态，不填零。不同来源的数据不直接相加。GMV Max 的归因包含付费和自然订单，ROI 不能直接代表素材带来的广告增量收益，见 [TikTok 官方归因说明](https://ads.tiktok.com/resources/help/article/about-attribution-for-gmv-max?lang=en)。
 
-API 接入放在出片试用之后。Business API 报表入口可参考 [TikTok 官方 SDK](https://github.com/tiktok/tiktok-business-api-sdk/blob/main/python_sdk/docs/ReportingApi.md)；Shop 官方已公布 `/analytics/202605/shop_videos/performance`，其说明列出 Analytics scope 和 T-1 数据延迟，见[官方更新说明](https://partner.tiktokshop.com/docv2/page/kpkfccsa)。这些是后续接入依据，不代表目标账号已具备权限或所有字段可用。
+API 接入放在出片试用之后。Business API 报表入口可参考 [TikTok 官方 SDK](https://github.com/tiktok/tiktok-business-api-sdk/blob/main/python_sdk/docs/ReportingApi.md)；Shop 官方已公布 `/analytics/202605/shop_videos/performance`，其说明列出 Analytics scope 和 T-1 数据延迟，见[官方更新说明](https://partner.tiktokshop.com/docv2/page/kpkfccsa)。这些是后续接入依据，不代表目标账号已具备权限或所有字段可用。登录后的账号在桌面自己创建店铺，一个账号可以创建多家。店铺授权和官方数据回流等公司主体开通接口后再绑定。已保留授权回调和视频表现写入，没有调用过真实店铺，罗盘页面也不抓取。
 
 ## 选品、分析与投放的后续方向
 

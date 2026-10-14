@@ -54,6 +54,35 @@ func (s *Store) Steps(jobID string) ([]jobs.Step, error) {
 	return steps, rows.Err()
 }
 
+// RecoverInterrupted rewinds every job that was running or marked successful.
+// A successful step whose file is gone returns to pending. Failed and cancelled steps stay.
+func (s *Store) RecoverInterrupted() error {
+	rows, err := s.db.Query(`SELECT DISTINCT job_id FROM job_steps WHERE status IN (?, ?)`, jobs.Running, jobs.Succeeded)
+	if err != nil {
+		return err
+	}
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+	for _, id := range ids {
+		if _, err := s.RecoverJob(id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // RecoverJob rewrites interrupted steps after a restart.
 // A stored progress value is not kept, and it cannot make a step successful.
 func (s *Store) RecoverJob(jobID string) ([]jobs.Step, error) {

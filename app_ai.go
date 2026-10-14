@@ -56,6 +56,14 @@ func aiClips(rows []store.Clip) []ai.Clip {
 
 // GenerateScripts validates a fixture or supplier response into reviewable candidates.
 func (a *App) GenerateScripts(skuID, facts string) (ai.Generation, error) {
+	clips, err := a.db.ListClips(skuID)
+	if err != nil {
+		return ai.Generation{}, err
+	}
+	return a.generateScripts(skuID, facts, clips)
+}
+
+func (a *App) generateScripts(skuID, facts string, clips []store.Clip) (ai.Generation, error) {
 	plain, err := a.token()
 	if err != nil {
 		return ai.Generation{}, err
@@ -70,10 +78,6 @@ func (a *App) GenerateScripts(skuID, facts string) (ai.Generation, error) {
 			return ai.Generation{}, err
 		}
 		facts = sku.Facts
-	}
-	clips, err := a.db.ListClips(skuID)
-	if err != nil {
-		return ai.Generation{}, err
 	}
 	gen, err := ai.Generate(a.ctx, a.ai, plain, skuID, ai.FactsFromText(facts), aiClips(clips))
 	if err != nil {
@@ -145,6 +149,14 @@ func ttsVoice(voice string) string {
 
 // AssembleCandidate synthesizes the approved copy and builds a draft from the real audio length.
 func (a *App) AssembleCandidate(projectID, skuID, fontID, bgmID, voice string, candidate ai.Candidate) (store.Draft, error) {
+	clips, err := a.db.ListClips(skuID)
+	if err != nil {
+		return store.Draft{}, err
+	}
+	return a.assembleCandidate(projectID, skuID, fontID, bgmID, voice, candidate, clips)
+}
+
+func (a *App) assembleCandidate(projectID, skuID, fontID, bgmID, voice string, candidate ai.Candidate, clips []store.Clip) (store.Draft, error) {
 	if candidate.TranslationStale() {
 		return store.Draft{}, fmt.Errorf("中文回译已失效，请先重新生成回译")
 	}
@@ -156,10 +168,6 @@ func (a *App) AssembleCandidate(projectID, skuID, fontID, bgmID, voice string, c
 		return store.Draft{}, err
 	}
 	voice = ttsVoice(voice)
-	clips, err := a.db.ListClips(skuID)
-	if err != nil {
-		return store.Draft{}, err
-	}
 	footage := make([]timeline.Footage, 0, len(clips))
 	for _, clip := range clips {
 		footage = append(footage, timeline.Footage{

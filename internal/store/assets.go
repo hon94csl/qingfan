@@ -30,13 +30,14 @@ type ImportRequest struct {
 
 // ImportResult is the asset and clips after import.
 type ImportResult struct {
-	AssetID     string
-	LocationID  string
-	SHA256      string
-	Source      string
-	Rights      string
-	ReusedProbe bool
-	ClipIDs     []string
+	AssetID     string   `json:"asset_id"`
+	LocationID  string   `json:"location_id"`
+	SHA256      string   `json:"sha256"`
+	Source      string   `json:"source"`
+	Rights      string   `json:"rights"`
+	ReusedProbe bool     `json:"reused_probe"`
+	ClipIDs     []string `json:"clip_ids"`
+	DurationMS  int      `json:"duration_ms"`
 }
 
 // Clip is one usable or rejected shot interval.
@@ -178,6 +179,7 @@ func (s *Store) importFile(ctx context.Context, req ImportRequest) (ImportResult
 	return ImportResult{
 		AssetID: assetID, LocationID: locID, SHA256: sum,
 		Source: source, Rights: rights, ReusedProbe: ingested.Reused, ClipIDs: clipIDs,
+		DurationMS: ingested.Info.DurationMS,
 	}, nil
 }
 

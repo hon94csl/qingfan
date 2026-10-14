@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/hon94csl/qingfan/internal/ai"
+	"github.com/hon94csl/qingfan/internal/auth"
 	"github.com/hon94csl/qingfan/internal/credentials"
 	"github.com/hon94csl/qingfan/internal/media"
 	"github.com/hon94csl/qingfan/internal/store"
@@ -20,6 +22,11 @@ type App struct {
 	ai       *ai.Gateway
 	aiErr    error
 	creds    credentials.Store
+	authMu   sync.Mutex
+	auth     *auth.Store
+	authErr  error
+	session  string
+	who      auth.Account
 }
 
 func dataDir() string {
@@ -35,9 +42,17 @@ func (a *App) startup(ctx context.Context) {
 		a.creds = credentials.Default()
 	}
 	base := dataDir()
+	accounts, err := auth.Open(filepath.Join(base, "auth.sqlite"))
+	a.auth = accounts
+	a.authErr = err
 	db, err := store.Open(filepath.Join(base, "qingfan.sqlite"), filepath.Join(base, "cache"))
 	a.db = db
 	a.storeErr = err
+	if err == nil && db != nil {
+		if err := db.RecoverInterrupted(); err != nil {
+			a.storeErr = err
+		}
+	}
 	provider, err := ai.ProviderFromEnv()
 	if err != nil {
 		a.aiErr = err
@@ -55,9 +70,15 @@ func (a *App) shutdown(context.Context) {
 	if a.db != nil {
 		a.db.Close()
 	}
+	if a.auth != nil {
+		a.auth.Close()
+	}
 }
 
 func (a *App) ready() error {
+	if _, err := a.requireAccount(); err != nil {
+		return err
+	}
 	if a.storeErr != nil {
 		return a.storeErr
 	}
@@ -68,7 +89,12 @@ func (a *App) ready() error {
 }
 
 // CheckMediaTools reports whether ffmpeg and ffprobe can start.
-func (a *App) CheckMediaTools() []media.ToolStatus { return media.CheckTools(a.ctx) }
+func (a *App) CheckMediaTools() []media.ToolStatus {
+	if _, err := a.requireAccount(); err != nil {
+		return nil
+	}
+	return media.CheckTools(a.ctx)
+}
 
 // CreateProject adds a workspace.
 func (a *App) CreateProject(name, market, locale string) (store.Project, error) {

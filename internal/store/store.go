@@ -70,6 +70,14 @@ func open(path, cacheDir string, ingest IngestFunc) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
+	if _, err := db.Exec(`PRAGMA busy_timeout = 5000`); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if _, err := db.Exec(`PRAGMA journal_mode = WAL`); err != nil {
+		db.Close()
+		return nil, err
+	}
 	s := &Store{db: db, cacheDir: cacheDir, ingest: ingest}
 	if err := s.migrate(); err != nil {
 		db.Close()

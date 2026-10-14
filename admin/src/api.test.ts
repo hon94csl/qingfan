@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { getHealth } from './api.ts';
+import { getHealth, login } from './api.ts';
 
 test('health validates responses and preserves HTTP errors', async () => {
   const original = globalThis.fetch;
@@ -13,5 +13,7 @@ test('health validates responses and preserves HTTP errors', async () => {
     await assert.rejects(getHealth(), /unavailable/);
     globalThis.fetch = async () => Response.json({ status: 'ok', service: 'other' });
     await assert.rejects(getHealth(), /健康检查协议/);
+    globalThis.fetch = async () => Response.json({ error: '邮箱或密码不正确' }, { status: 401 });
+    await assert.rejects(login('ops@example.com', 'long-test-password'), /邮箱或密码不正确/);
   } finally { globalThis.fetch = original; }
 });

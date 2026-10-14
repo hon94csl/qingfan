@@ -1,6 +1,18 @@
 package main
 
-import "github.com/hon94csl/qingfan/internal/reporting"
+import (
+	"github.com/hon94csl/qingfan/internal/ai"
+	"github.com/hon94csl/qingfan/internal/reporting"
+)
+
+// Usage reads the workspace ledger. Amounts stay in known micros and unknown calls.
+func (a *App) Usage() (ai.CostReport, error) {
+	plain, err := a.token()
+	if err != nil {
+		return ai.CostReport{}, err
+	}
+	return a.ai.Costs(plain)
+}
 
 // BindPublication records one post against an existing export.
 func (a *App) BindPublication(outputID, url, videoID, shop, publishedAt string) (reporting.Publication, error) {
